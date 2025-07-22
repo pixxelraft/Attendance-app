@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Offline Attendance App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 1rem;
+      background: #fdf0d5;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      color: #780000;
+    }
+    input, select, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+      width: 100%;
+      box-sizing: border-box;
+      background-color: #4CAF50;
+      color: white;
+    }
+    .student-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin: 1rem 0;
+      border: 1px solid black;
+      font-family: monospace;
+      color: aliceblue;
+      padding: 0.5rem;
+      background: #003049;
+    }
+    .student-list label {
+      display: block;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      margin-left: auto;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    .student-list input[type="checkbox"] {
+      margin-left: 0.1rem;
+      transform: scale(1.2); /* optional: make checkboxes a bit bigger */
+    }
+    button.copy {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Attendance Marker by Umair</h1>
+
+  <label for="date">Select Date:</label>
+  <input type="date" id="date" required>
+
+  <label for="subject">Select Subject:</label>
+  <select id="subject">
+    <option value="Web Development">Web Development</option>
+    <option value="OOPs">OOPs</option>
+    <option value="Digital Electronics">Digital Electronics</option>
+    <option value="Maths 3">Maths 3</option>
+    <option value="Organisational Behaviour">Organisational Behaviour</option>
+    <option value="Data Structure">Data Structure</option>
+    <option value="Compiler Design">Compiler Design</option>
+  </select>
+
+  <div class="student-list" id="studentList"></div>
+
+  <button onclick="generateText()">Generate Text</button>
+  <textarea id="output" readonly></textarea>
+  <button class="copy" onclick="copyText()">Copy to Clipboard</button>
+
+  <script>
+    const students = [
+      { name: "Kruti Deepa", roll: 74 }, { name: "Kumar Sabhyasachi", roll: 75 },
+      { name: "KumKum Mandal", roll: 76 }, { name: "Laximdar Birua", roll: 77 },
+      { name: "Lopa Mudra Mohanty", roll: 78 }, { name: "M.Chandrasekher Rao", roll: 79 },
+      { name: "Madhaba Nanda Patra", roll: 80 }, { name: "Madhusmita Rout", roll: 81 },
+      { name: "Mamata Sahoo", roll: 82 }, { name: "Manjit Sahoo", roll: 83 },
+      { name: "Manmat Sahoo", roll: 84 }, { name: "Manyajeet Behra", roll: 85 },
+      { name: "Mrutunjaya Behera", roll: 86 }, { name: "Niggamanada Sahoo", roll: 87 },
+      { name: "Niteesh Behera", roll: 88 }, { name: "Omm Prakash Behera", roll: 89 },
+      { name: "Omm Sai Rudrapratap Prusty", roll: 90 }, { name: "Omm Narayan Das", roll: 91 },
+      { name: "Omm prakash Pattnaik", roll: 92 }, { name: "Omm Sibanand Dixit", roll: 93 },
+      { name: "Piyush Kumar", roll: 94 }, { name: "IDK", roll: 95 },
+      { name: "Prajukta Behra", roll: 96 }, { name: "Prakash Nayak", roll: 97 },
+      { name: "Pratap Kumar Parida", roll: 98 }, { name: "Pratuysh Sahoo", roll: 99 },
+      { name: "Pratyusha Sahoo", roll: 100 }, { name: "Priyambada Malik", roll: 101 },
+      { name: "Priyanka Das", roll: 102 }, { name: "Priyanka Mahali", roll: 103 },
+      { name: "Priyanka Sahani", roll: 104 }, { name: "Priya Ranjan Das", roll: 105 },
+      { name: "Pullakita Mohrana", roll: 106 }, { name: "Qauseen Ahmad", roll: 107 },
+      { name: "Rakesh Kumar Sahoo", roll: 108 }, { name: "Rati Ranjan Parida", roll: 109 },
+      { name: "Rehnuma Parween", roll: 110 }, { name: "Rohit Samantray", roll: 111 },
+      { name: "Rudra Prasad Rout", roll: 112 }, { name: "Sagarika Pattnaik", roll: 113 },
+      { name: "Saikrishna Das", roll: 114 }, { name: "Sailesh Mohanty", roll: 115 },
+      { name: "Salin Mohapatra", roll: 116 }, { name: "Samarjeet Badu", roll: 117 },
+      { name: "Sankalp Puhan", roll: 118 }, { name: "Santosh Kumar Bhal", roll: 119 },
+      { name: "Santrupta Jena", roll: 120 }, { name: "Sarada Prasad Rout", roll: 121 },
+      { name: "Satyajeet Behra", roll: 122 }, { name: "Satyam Mohapatra", roll: 123 },
+      { name: "Sayed Maqsood Ali", roll: 124 }, { name: "Sayed Umair Ali", roll: 125 },
+      { name: "Shagun Shree", roll: 126 }, { name: "Saswat Behera", roll: 127 },
+      { name: "Shreya Karmakar", roll: 128 }, { name: "Sipun Kumar Mohanta", roll: 129 }
+    ];
+
+    const studentListDiv = document.getElementById('studentList');
+    const sortedStudents = [...students].sort((a, b) => a.roll - b.roll);
+
+    sortedStudents.forEach(student => {
+      const label = document.createElement('label');
+      label.innerHTML = `${student.name} - Roll ${student.roll} <input type="checkbox" value="${student.name} (${student.roll})">`;
+      studentListDiv.appendChild(label);
+    });
+
+    function formatDate(dateString) {
+      const [year, month, day] = dateString.split("-");
+      return `${day}/${month}/${year.slice(2)}`;
+    }
+
+    function generateText() {
+      const date = document.getElementById('date').value;
+      const subject = document.getElementById('subject').value;
+      const checkboxes = studentListDiv.querySelectorAll('input[type=checkbox]');
+      const present = [];
+
+      checkboxes.forEach(cb => {
+        if (cb.checked) present.push(cb.value);
+      });
+
+      const formatted = `Class: ABIT CSE 2024-2028, Section-B
+Subject: ${subject}
+Date: ${formatDate(date)}
+
+Present:
+${present.map(p => '- ' + p).join('\n')}`;
+
+      document.getElementById('output').value = formatted;
+    }
+
+    function copyText() {
+      const output = document.getElementById('output');
+      output.select();
+      document.execCommand('copy');
+      alert('Copied to clipboard!');
+    }
+  </script>
+</body>
+</html>
